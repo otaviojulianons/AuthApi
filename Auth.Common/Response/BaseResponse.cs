@@ -4,13 +4,15 @@ namespace Auth.Common.Response
 {
     public class BaseResponse<T>
     {
-        public BaseResponse(T data = default)
+        public BaseResponse(T data = default, bool success = false)
         {
             Data = data;
+            Success = success;
         }
 
-        public T Data { get; set; }
-        public List<Notification> Errors { get; set; }
+        public T Data { get; private set; }
+        public bool Success { get; private set; }
+        public List<Notification> Errors { get; private set; } = new List<Notification>();
 
         public BaseResponse<T> Error(string errorMessage)
         {

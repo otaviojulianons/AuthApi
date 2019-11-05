@@ -13,8 +13,6 @@ namespace Auth.Domain.Entities
 
         public string Password { get; set; }
 
-        public UserGroup Group { get; set; }
-
         public IEnumerable<PermissionDomain> Permissions { get; set; }
 
     }
