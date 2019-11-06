@@ -1,40 +1,50 @@
 ﻿using Auth.Application.Messages;
 using Auth.Application.Services;
 using Auth.Common.Response;
+using Auth.Domain.Repositories;
+using Auth.Infrastructure.Jwt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
 
-namespace AuthApi.Controllers
+namespace Auth.WebApi.Controllers
 {
-    [ApiController]
-    [Route("[controller]/[action]")]
-    public class UserController : ControllerBase
+    [Route("users")]
+    public class UserController : BaseController
     {
         private UserService _userService;
 
-        public UserController(UserService userService)
+        public UserController(
+            UserService userService)
         {
             _userService = userService;
         }
 
-        [HttpPost()]
-        public BaseResponse<string> Login([FromBody] UserAuthenticateRequest userAuthenticate)
-        {
-            var response = _userService.Login(userAuthenticate.Email, userAuthenticate.Password);
-            return FormatResponse(response);
-        }
-
-        [Authorize]
         [HttpGet]
-        public string Teste()
+        public BaseResponse<IEnumerable<UserResponseDto>> GetUsers()
         {
-            return "OK";
+            return _userService.GetAll();
         }
 
-        private BaseResponse<T> FormatResponse<T>(BaseResponse<T> response)
+        [HttpGet("{id}")]
+        public BaseResponse<UserResponseDto> GetById([FromRoute]Guid id)
         {
-            Response.StatusCode = response.Success ? 200 : 400;
-            return response;
+            return _userService.GetById(id);
+        }
+
+        //[Authorize(Roles = AuthRoleNames.Admin)]
+        [HttpPost]
+        public BaseResponse CreateUser([FromBody] UserCreateDto createUserRequest)
+        {
+            return _userService.CreateUser(createUserRequest);
+        }
+
+        //[Authorize(Roles = AuthRoleNames.Admin)]
+        [HttpDelete("{id}")]
+        public BaseResponse DeleteUser([FromRoute]Guid id)
+        {
+            return _userService.DeleteUser(id);
         }
     }
 }

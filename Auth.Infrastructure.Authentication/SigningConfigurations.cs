@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Auth.Common.Cryptography
+namespace Auth.Infrastructure.Jwt
 {
     public class SigningConfigurations
     {

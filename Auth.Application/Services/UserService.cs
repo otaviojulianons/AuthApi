@@ -1,27 +1,26 @@
-﻿using Auth.Common.Cryptography;
+﻿using Auth.Application.Mappers;
+using Auth.Application.Messages;
+using Auth.Common.Cryptography;
 using Auth.Common.Response;
+using Auth.Domain.Entities;
 using Auth.Domain.Repositories;
-using Microsoft.IdentityModel.Tokens;
+using Auth.Infrastructure.Jwt;
 using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Principal;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Auth.Application.Services
 {
     public class UserService
     {
-        private SigningConfigurations _signingConfigurations;
-        private TokenConfigurations _tokenConfigurations;
+        private JwtTokenService _jwtTokenService;
         private IUserRepository _userRepository;
 
         public UserService(
-            SigningConfigurations signingConfigurations,
-            TokenConfigurations tokenConfigurations,
+            JwtTokenService jwtTokenService,
             IUserRepository userRepository)
         {
-            _signingConfigurations = signingConfigurations;
-            _tokenConfigurations = tokenConfigurations;
+            _jwtTokenService = jwtTokenService;
             _userRepository = userRepository;
         }
 
@@ -37,30 +36,7 @@ namespace Auth.Application.Services
                 if (user.Password != passwordEncrypt)
                     return new BaseResponse<string>().Error("Invalid User/Password.");
 
-                ClaimsIdentity identity = new ClaimsIdentity(
-                     new GenericIdentity(user.Id.ToString(), "Login"),
-                     new[] {
-                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
-                        new Claim(JwtRegisteredClaimNames.UniqueName, user.Id.ToString())
-                     }
-                 );
-
-                DateTime dataCriacao = DateTime.Now;
-                DateTime dataExpiracao = dataCriacao +
-                    TimeSpan.FromSeconds(_tokenConfigurations.Seconds);
-
-                var handler = new JwtSecurityTokenHandler();
-                var securityToken = handler.CreateToken(new SecurityTokenDescriptor
-                {
-                    Issuer = _tokenConfigurations.Issuer,
-                    Audience = _tokenConfigurations.Audience,
-                    SigningCredentials = _signingConfigurations.SigningCredentials,
-                    Subject = identity,
-                    NotBefore = dataCriacao,
-                    Expires = dataExpiracao
-                });
-                var token = handler.WriteToken(securityToken);
-
+                var token = _jwtTokenService.GererateToken(user);
                 return new BaseResponse<string>(token, true);
             }
             catch (Exception ex)
@@ -69,5 +45,55 @@ namespace Auth.Application.Services
             }
         }
 
+        public BaseResponse<UserResponseDto> GetById(Guid id)
+        {
+            var user = _userRepository.GetUserById(id);
+            return new BaseResponse<UserResponseDto>(user.ToUserResponse());
+        }
+
+        public BaseResponse<IEnumerable<UserResponseDto>> GetAll()
+        {
+            var users = _userRepository.GetAll();
+            var usersResponse = users.Select(user => user.ToUserResponse());
+
+            return new BaseResponse<IEnumerable<UserResponseDto>>(usersResponse);
+        }
+
+        public BaseResponse CreateUser(UserCreateDto createUserRequest)
+        {
+            try
+            {
+                var userEmail = _userRepository.GetUserByEmail(createUserRequest.Email);
+                if (userEmail != null)
+                    return new BaseResponse().Error("Email already exists.");
+
+                var user = new UserDomain()
+                {
+                    Email = createUserRequest.Email,
+                    Password = createUserRequest.Password,
+                    Permissions = createUserRequest.Permissions
+                };
+
+                var result = _userRepository.Insert(user);
+                return new BaseResponse(result);
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<string>().Error(ex.Message);
+            }
+        }
+
+        public BaseResponse DeleteUser(Guid id)
+        {
+            try
+            {
+                var result = _userRepository.Delete(id);
+                return new BaseResponse(result);
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<string>().Error(ex.Message);
+            }
+        }
     }
 }

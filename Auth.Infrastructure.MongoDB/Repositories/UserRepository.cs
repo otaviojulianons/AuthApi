@@ -2,6 +2,8 @@
 using Auth.Domain.Repositories;
 using Auth.Infrastructure.MongoDB.Contexts;
 using MongoDB.Driver;
+using System;
+using System.Collections.Generic;
 
 namespace Auth.Infrastructure.MongoDB.Repositories
 {
@@ -14,9 +16,31 @@ namespace Auth.Infrastructure.MongoDB.Repositories
             _collection = context.Database.GetCollection<UserDomain>("Users");
         }
 
+        public IEnumerable<UserDomain> GetAll()
+        {
+            return _collection.AsQueryable();
+        }
+
+        public UserDomain GetUserById(Guid id)
+        {
+            return _collection.Find(x => x.Id == id).FirstOrDefault();
+        }
+
         public UserDomain GetUserByEmail(string email)
         {
             return _collection.Find(x => x.Email == email).FirstOrDefault();
+        }
+
+        public bool Insert(UserDomain user)
+        {
+            _collection.InsertOne(user);
+            return true;
+        }
+
+        public bool Delete(Guid id)
+        {
+            var result = _collection.DeleteOne(user => user.Id == id);
+            return result.DeletedCount > 0;
         }
     }
 }

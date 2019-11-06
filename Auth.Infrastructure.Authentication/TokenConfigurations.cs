@@ -1,4 +1,4 @@
-﻿namespace Auth.Common.Cryptography
+﻿namespace Auth.Infrastructure.Jwt
 {
     public class TokenConfigurations
     {

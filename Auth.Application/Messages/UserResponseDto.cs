@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Auth.Domain.Entities
+namespace Auth.Application.Messages
 {
-    public class UserDomain
+    public class UserResponseDto
     {
         public Guid Id { get; set; }
 
@@ -14,6 +14,5 @@ namespace Auth.Domain.Entities
         public string Password { get; set; }
 
         public IEnumerable<string> Permissions { get; set; }
-
     }
 }

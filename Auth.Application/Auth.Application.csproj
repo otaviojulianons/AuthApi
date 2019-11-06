@@ -11,6 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Auth.Common\Auth.Common.csproj" />
     <ProjectReference Include="..\Auth.Domain\Auth.Domain.csproj" />
+    <ProjectReference Include="..\Auth.Infrastructure.Authentication\Auth.Infrastructure.Jwt.csproj" />
   </ItemGroup>
 
 </Project>
