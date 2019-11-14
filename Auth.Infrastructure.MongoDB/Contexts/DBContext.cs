@@ -29,6 +29,7 @@ namespace Auth.Infrastructure.MongoDB.Contexts
                 {
                     cm.AutoMap();
                     cm.MapIdMember(c => c.Id).SetIdGenerator(GuidGenerator.Instance);
+                    cm.MapField("_permissions").SetElementName("Permissions");
                 });
             }
         }
@@ -39,13 +40,7 @@ namespace Auth.Infrastructure.MongoDB.Contexts
             var admin = _userCollection.Find(x => x.Admin).FirstOrDefault();
             if(admin == null)
             {
-                var userAdmin = new UserDomain()
-                {
-                    Id = new Guid(),
-                    Admin = true,
-                    Email = "admin",
-                    Password = "21232f297a57a5a743894a0e4a801fc3",
-                };
+                var userAdmin = new UserDomain(new Guid(), "admin", "21232f297a57a5a743894a0e4a801fc3", true);
                 _userCollection.InsertOne(userAdmin);
             }
         }

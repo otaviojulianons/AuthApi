@@ -35,9 +35,16 @@ namespace Auth.WebApi.Controllers
 
         //[Authorize(Roles = AuthRoleNames.Admin)]
         [HttpPost]
-        public BaseResponse CreateUser([FromBody] UserCreateDto createUserRequest)
+        public BaseResponse CreateUser([FromBody] UserRequestDto createUserRequest)
         {
             return _userService.CreateUser(createUserRequest);
+        }
+
+        //[Authorize(Roles = AuthRoleNames.Admin)]
+        [HttpPut("{id}")]
+        public BaseResponse UpdateUser([FromRoute]Guid id, [FromBody] UserRequestDto updateUserRequest)
+        {
+            return _userService.UpdateUser(id, updateUserRequest);
         }
 
         //[Authorize(Roles = AuthRoleNames.Admin)]

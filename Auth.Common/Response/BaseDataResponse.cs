@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Auth.Common.Response
+﻿namespace Auth.Common.Response
 {
     public class BaseResponse<T> : BaseResponse
     {

@@ -5,15 +5,35 @@ namespace Auth.Domain.Entities
 {
     public class UserDomain
     {
-        public Guid Id { get; set; }
+        private HashSet<string> _permissions;
 
-        public bool Admin { get; set; }
+        public UserDomain(string email, string password)
+            : this(Guid.NewGuid(), email, password){}
 
-        public string Email { get; set; }
+        public UserDomain(Guid id, string email, string password, bool admin = false)
+        {
+            Id = id;
+            Email = email;
+            Password = password;
+            Admin = admin;
+        }
 
-        public string Password { get; set; }
+        public Guid Id { get; private set; }
 
-        public IEnumerable<string> Permissions { get; set; }
+        public string Email { get; private set; }
+
+        public string Password { get; private set; }
+
+        public bool Admin { get; private set; }
+
+        public IReadOnlyCollection<string> Permissions => _permissions ?? new HashSet<string>();
+
+        public void AddPermission(string permission)
+        {
+            if (_permissions == null)
+                _permissions = new HashSet<string>();
+            _permissions.Add(permission);
+        } 
 
     }
 }

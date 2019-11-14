@@ -10,6 +10,7 @@ namespace Auth.Domain.Repositories
         public UserDomain GetUserById(Guid id);
         public UserDomain GetUserByEmail(string email);
         bool Insert(UserDomain user);
+        bool Update(UserDomain user);
         bool Delete(Guid id);
     }
 }

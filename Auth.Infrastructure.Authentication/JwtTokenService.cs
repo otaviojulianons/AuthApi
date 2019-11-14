@@ -50,6 +50,7 @@ namespace Auth.Infrastructure.Jwt
             claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")));
             claims.Add(new Claim(JwtRegisteredClaimNames.UniqueName, user.Id.ToString()));
             claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email));
+            if(user.Permissions.Any())
             claims.AddRange(user.Permissions.Select(permission => new Claim(ClaimTypes.Role, permission)));
             if (user.Admin)
                 claims.Add(new Claim(ClaimTypes.Role, AuthRoleNames.Admin));

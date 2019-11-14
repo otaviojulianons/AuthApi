@@ -37,9 +37,15 @@ namespace Auth.Infrastructure.MongoDB.Repositories
             return true;
         }
 
+        public bool Update(UserDomain user)
+        {
+            var result =_collection.ReplaceOne(x => x.Id == user.Id, user);
+            return result.ModifiedCount > 0;
+        }
+
         public bool Delete(Guid id)
         {
-            var result = _collection.DeleteOne(user => user.Id == id);
+            var result = _collection.DeleteOne(x => x.Id == id);
             return result.DeletedCount > 0;
         }
     }

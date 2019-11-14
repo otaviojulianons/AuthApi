@@ -48,7 +48,10 @@ namespace Auth.Application.Services
         public BaseResponse<UserResponseDto> GetById(Guid id)
         {
             var user = _userRepository.GetUserById(id);
-            return new BaseResponse<UserResponseDto>(user.ToUserResponse());
+            if (user != null)
+                return new BaseResponse<UserResponseDto>(user.ToUserResponse());
+            else
+                return new BaseResponse<UserResponseDto>().Error("User not found.");
         }
 
         public BaseResponse<IEnumerable<UserResponseDto>> GetAll()
@@ -59,7 +62,7 @@ namespace Auth.Application.Services
             return new BaseResponse<IEnumerable<UserResponseDto>>(usersResponse);
         }
 
-        public BaseResponse CreateUser(UserCreateDto createUserRequest)
+        public BaseResponse CreateUser(UserRequestDto createUserRequest)
         {
             try
             {
@@ -67,14 +70,28 @@ namespace Auth.Application.Services
                 if (userEmail != null)
                     return new BaseResponse().Error("Email already exists.");
 
-                var user = new UserDomain()
-                {
-                    Email = createUserRequest.Email,
-                    Password = createUserRequest.Password,
-                    Permissions = createUserRequest.Permissions
-                };
+                var user = createUserRequest.ToUserDomain(Guid.NewGuid());
 
                 var result = _userRepository.Insert(user);
+                return new BaseResponse(result);
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<string>().Error(ex.Message);
+            }
+        }
+
+        public BaseResponse UpdateUser(Guid id, UserRequestDto updateUserRequest)
+        {
+            try
+            {
+                var userEmail = _userRepository.GetUserById(id);
+                if (userEmail == null)
+                    return new BaseResponse().Error("User not found.");
+
+                var userDomain = updateUserRequest.ToUserDomain(id);
+
+                var result = _userRepository.Update(userDomain);
                 return new BaseResponse(result);
             }
             catch (Exception ex)
