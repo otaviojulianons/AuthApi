@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>D:\Projetos\github\AuthApi\Auth.WebApi\Auth.WebApi.xml</DocumentationFile>
+    <DocumentationFile>.\Auth.WebApi.xml</DocumentationFile>
     <WarningLevel>2</WarningLevel>
   </PropertyGroup>
 

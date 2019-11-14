@@ -15,6 +15,7 @@ namespace Auth.Application.Services
     {
         private JwtTokenService _jwtTokenService;
         private IUserRepository _userRepository;
+        private BaseResponse _baseResponse;
 
         public UserService(
             JwtTokenService jwtTokenService,
@@ -22,6 +23,7 @@ namespace Auth.Application.Services
         {
             _jwtTokenService = jwtTokenService;
             _userRepository = userRepository;
+            _baseResponse = new BaseResponse();
         }
 
         public BaseResponse<string> Login(string email, string password)
@@ -70,9 +72,11 @@ namespace Auth.Application.Services
                 if (userEmail != null)
                     return new BaseResponse().Error("Email already exists.");
 
-                var user = createUserRequest.ToUserDomain(Guid.NewGuid());
+                var userDomain = createUserRequest.ToUserDomain(Guid.NewGuid());
+                if(!userDomain.IsValid(_baseResponse))
+                    return _baseResponse;
 
-                var result = _userRepository.Insert(user);
+                var result = _userRepository.Insert(userDomain);
                 return new BaseResponse(result);
             }
             catch (Exception ex)
@@ -90,6 +94,8 @@ namespace Auth.Application.Services
                     return new BaseResponse().Error("User not found.");
 
                 var userDomain = updateUserRequest.ToUserDomain(id);
+                if(!userDomain.IsValid(_baseResponse))
+                    return _baseResponse;
 
                 var result = _userRepository.Update(userDomain);
                 return new BaseResponse(result);

@@ -37,10 +37,10 @@ namespace Auth.Infrastructure.MongoDB.Contexts
         private void RegisterUserAdmin()
         {
             var _userCollection = Database.GetCollection<UserDomain>("Users");
-            var admin = _userCollection.Find(x => x.Admin).FirstOrDefault();
+            var admin = _userCollection.Find(x => x.Role == UserRoles.Admin).FirstOrDefault();
             if(admin == null)
             {
-                var userAdmin = new UserDomain(new Guid(), "admin", "21232f297a57a5a743894a0e4a801fc3", true);
+                var userAdmin = new UserDomain(new Guid(), "admin", "21232f297a57a5a743894a0e4a801fc3", UserRoles.Admin);
                 _userCollection.InsertOne(userAdmin);
             }
         }

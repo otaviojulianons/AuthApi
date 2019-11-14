@@ -32,11 +32,8 @@ namespace Auth.Infrastructure.Jwt
             var handler = new JwtSecurityTokenHandler();
             var securityToken = handler.CreateToken(new SecurityTokenDescriptor
             {
-                Issuer = _tokenConfigurations.Issuer,
-                Audience = _tokenConfigurations.Audience,
                 SigningCredentials = _signingConfigurations.SigningCredentials,
                 Subject = identity,
-                NotBefore = dataCriacao,
                 Expires = dataExpiracao
             });
 
@@ -50,10 +47,10 @@ namespace Auth.Infrastructure.Jwt
             claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")));
             claims.Add(new Claim(JwtRegisteredClaimNames.UniqueName, user.Id.ToString()));
             claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email));
-            if(user.Permissions.Any())
-            claims.AddRange(user.Permissions.Select(permission => new Claim(ClaimTypes.Role, permission)));
-            if (user.Admin)
-                claims.Add(new Claim(ClaimTypes.Role, AuthRoleNames.Admin));
+            claims.Add(new Claim(ClaimTypes.Role, user.Role));
+
+            //if(user.Permissions.Any())
+            //claims.AddRange(user.Permissions.Select(permission => new Claim(ClaimTypes.Role, permission)));
 
             return new ClaimsIdentity(genericIdentity, claims);
         }

@@ -1,5 +1,7 @@
 ﻿
 using System.Security.Cryptography;
+using System.Text;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Auth.Infrastructure.Jwt
@@ -9,14 +11,11 @@ namespace Auth.Infrastructure.Jwt
         public SecurityKey Key { get; }
         public SigningCredentials SigningCredentials { get; }
 
-        public SigningConfigurations()
+        public SigningConfigurations(TokenConfigurations tokenConfigurations)
         {
-            using (var provider = new RSACryptoServiceProvider(2048))
-            {
-                Key = new RsaSecurityKey(provider.ExportParameters(true));
-            }
-
-            SigningCredentials = new SigningCredentials(Key, SecurityAlgorithms.RsaSha256Signature);
+            var secret = Encoding.ASCII.GetBytes(tokenConfigurations.Secret);
+            Key = new SymmetricSecurityKey(secret);
+            SigningCredentials = new SigningCredentials(Key, SecurityAlgorithms.HmacSha256Signature);
         }
     }
 }

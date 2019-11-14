@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using System;
 
 namespace Auth.Infrastructure.Jwt
@@ -11,13 +12,15 @@ namespace Auth.Infrastructure.Jwt
     {
         public static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
-            var signingConfigurations = new SigningConfigurations();
-            services.AddSingleton(signingConfigurations);
+           
 
             var tokenConfigurations = new TokenConfigurations();
             new ConfigureFromConfigurationOptions<TokenConfigurations>(
                 configuration.GetSection("TokenConfigurations"))
                     .Configure(tokenConfigurations);
+
+             var signingConfigurations = new SigningConfigurations(tokenConfigurations);
+            services.AddSingleton(signingConfigurations);
 
             services.AddSingleton(tokenConfigurations);
             services.AddSingleton<JwtTokenService>();
@@ -28,14 +31,15 @@ namespace Auth.Infrastructure.Jwt
                 authOptions.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(bearerOptions =>
             {
-                var paramsValidation = bearerOptions.TokenValidationParameters;
-                paramsValidation.IssuerSigningKey = signingConfigurations.Key;
-                paramsValidation.ValidAudience = tokenConfigurations.Audience;
-                paramsValidation.ValidIssuer = tokenConfigurations.Issuer;
-
-                paramsValidation.ValidateIssuerSigningKey = true;
-                paramsValidation.ValidateLifetime = true;
-                paramsValidation.ClockSkew = TimeSpan.Zero;
+                bearerOptions.RequireHttpsMetadata = false;
+                bearerOptions.SaveToken = true;
+                bearerOptions.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = signingConfigurations.Key,
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
             });
 
             services.AddAuthorization(options =>
