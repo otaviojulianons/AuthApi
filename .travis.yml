@@ -1,0 +1,9 @@
+language: csharp
+mono: none
+dotnet: 3.0.100
+
+install:
+- dotnet restore Auth.WebApi/Auth.WebApi.csproj
+
+script:
+ - dotnet build Auth.WebApi/Auth.WebApi.csproj
