@@ -13,9 +13,9 @@ namespace Auth.Infrastructure.Jwt
 
         public SigningConfigurations(TokenConfigurations tokenConfigurations)
         {
-            var secret = Encoding.ASCII.GetBytes(tokenConfigurations.Secret);
+            var secret = Encoding.UTF8.GetBytes(tokenConfigurations.Secret);
             Key = new SymmetricSecurityKey(secret);
-            SigningCredentials = new SigningCredentials(Key, SecurityAlgorithms.HmacSha256Signature);
+            SigningCredentials = new SigningCredentials(Key, SecurityAlgorithms.HmacSha256);
         }
     }
 }

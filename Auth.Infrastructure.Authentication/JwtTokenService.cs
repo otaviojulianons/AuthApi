@@ -1,11 +1,9 @@
 ﻿using Auth.Domain.Entities;
-using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
-using System.Security.Principal;
 
 namespace Auth.Infrastructure.Jwt
 {
@@ -25,34 +23,31 @@ namespace Auth.Infrastructure.Jwt
         public string GererateToken(UserDomain user)
         {
             var identity = UserToClaimsIdentity(user);
+            DateTime expires = DateTime.Now + TimeSpan.FromSeconds(_tokenConfigurations.Seconds);
 
-            DateTime dataCriacao = DateTime.Now;
-            DateTime dataExpiracao = dataCriacao + TimeSpan.FromSeconds(_tokenConfigurations.Seconds);
-
-            var handler = new JwtSecurityTokenHandler();
-            var securityToken = handler.CreateToken(new SecurityTokenDescriptor
-            {
-                SigningCredentials = _signingConfigurations.SigningCredentials,
-                Subject = identity,
-                Expires = dataExpiracao
-            });
-
-            return handler.WriteToken(securityToken);
+            var securityToken = new JwtSecurityToken
+            (
+                issuer: null,
+                audience: null,
+                signingCredentials: _signingConfigurations.SigningCredentials,
+                expires: expires,
+                claims: identity.Claims
+            );
+            
+            return new JwtSecurityTokenHandler().WriteToken(securityToken);
         }
 
         private ClaimsIdentity UserToClaimsIdentity(UserDomain user)
         {
-            var genericIdentity = new GenericIdentity(user.Id.ToString(), "Login");
             var claims = new List<Claim>();
             claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")));
             claims.Add(new Claim(JwtRegisteredClaimNames.UniqueName, user.Id.ToString()));
             claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email));
             claims.Add(new Claim(ClaimTypes.Role, user.Role));
+            if (user.Permissions.Any())
+                claims.AddRange(user.Permissions.Select(permission => new Claim(ClaimTypes.Role, permission)));
 
-            //if(user.Permissions.Any())
-            //claims.AddRange(user.Permissions.Select(permission => new Claim(ClaimTypes.Role, permission)));
-
-            return new ClaimsIdentity(genericIdentity, claims);
+            return new ClaimsIdentity(new ClaimsIdentity(claims), claims);
         }
     }
 }

@@ -22,37 +22,35 @@ namespace Auth.WebApi.Controllers
             _userService = userService;
         }
 
-        [Authorize()]
+        [Authorize(UserPolicies.Admin)]
         [HttpGet]
         public BaseResponse<IEnumerable<UserResponseDto>> GetUsers()
         {
-            var a = this.User.IsInRole(UserRoles.Admin);
-            var user = this.User;
             return _userService.GetAll();
         }
 
-        [Authorize(Roles = UserRoles.Admin)]
+        [Authorize(UserPolicies.Admin)]
         [HttpGet("{id}")]
         public BaseResponse<UserResponseDto> GetById([FromRoute]Guid id)
         {
             return _userService.GetById(id);
         }
 
-        [Authorize(UserRoles.User)]
+        [Authorize(UserPolicies.Admin)]
         [HttpPost]
         public BaseResponse CreateUser([FromBody] UserRequestDto createUserRequest)
         {
             return _userService.CreateUser(createUserRequest);
         }
 
-        [Authorize(Roles = UserRoles.Admin)]
+        [Authorize(UserPolicies.Admin)]
         [HttpPut("{id}")]
         public BaseResponse UpdateUser([FromRoute]Guid id, [FromBody] UserRequestDto updateUserRequest)
         {
             return _userService.UpdateUser(id, updateUserRequest);
         }
 
-        [Authorize(Roles = UserRoles.Admin)]
+        [Authorize(UserPolicies.Admin)]
         [HttpDelete("{id}")]
         public BaseResponse DeleteUser([FromRoute]Guid id)
         {

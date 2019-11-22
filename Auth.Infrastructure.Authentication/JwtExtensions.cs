@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Auth.Domain.Entities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System;
+using System.Security.Claims;
 
 namespace Auth.Infrastructure.Jwt
 {
@@ -47,7 +48,13 @@ namespace Auth.Infrastructure.Jwt
                 var policy = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme);
                 policy.RequireAuthenticatedUser();
                 options.DefaultPolicy = policy.Build();
+
+                var policyAdmin = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme);
+                policyAdmin.RequireAuthenticatedUser();
+                policyAdmin.RequireClaim(ClaimTypes.Role, UserRoles.Admin);
+                options.AddPolicy(UserPolicies.Admin, policyAdmin.Build());
             });
+
         }
     }
 }
